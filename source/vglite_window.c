@@ -80,8 +80,6 @@ static vg_lite_buffer_format_t video_format_to_vglite(video_pixel_format_t forma
 
 vg_lite_window_t* VGLITE_CreateWindow(uint32_t displayId, vg_lite_rectangle_t* dimensions, vg_lite_buffer_format_t format)
 {
-	BOARD_PrepareDisplayController();
-
 	vg_lite_display_t* display = &g_display[displayId];
 	vg_lite_window_t* window = &g_window[displayId];
 

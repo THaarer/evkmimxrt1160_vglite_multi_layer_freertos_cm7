@@ -164,7 +164,7 @@ static void redraw()
     vg_lite_scale(10, 10, &matrix);
 
     vg_lite_clear(rt, NULL, 0xFFFF0000);
-    error = vg_lite_draw(rt, &path, VG_LITE_FILL_EVEN_ODD, &matrix, VG_LITE_BLEND_NONE, 0xFF0000FF);
+    error = vg_lite_draw(rt, &path, VG_LITE_FILL_EVEN_ODD, &matrix, VG_LITE_BLEND_NONE, 0xFF00FFFF);
     if (error)
     {
         PRINTF("vg_lite_draw() returned error %d\n", error);
@@ -189,10 +189,17 @@ static void vglite_task(void *pvParameters)
     status = BOARD_PrepareVGLiteController();
     if (status != kStatus_Success)
     {
-        PRINTF("Prepare VGlite contolor error\r\n");
+        PRINTF("Prepare VGlite controller error\r\n");
         while (1)
             ;
     }
+    status = BOARD_PrepareDisplayController();
+    if (status != kStatus_Success)
+        {
+            PRINTF("Prepare Display controller error\r\n");
+            while (1)
+                ;
+        }
 
     error = init_vg_lite();
     if (error)
