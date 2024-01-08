@@ -24,33 +24,21 @@
  * Variables
  ******************************************************************************/
 
-static const int s_layerWidth[APP_HW_LAYERS_COUNT] = {
-    L1_WIDTH,
-    L2_WIDTH,
-    L3_WIDTH,
-    L4_WIDTH,
-    L5_WIDTH,
-    L6_WIDTH,
-    L7_WIDTH,
-};
+#define APP_FB_SIZE 0x1000000
 
-AT_NONCACHEABLE_SECTION_ALIGN( static uint8_t s_frameBuffer1[APP_BUFFER_COUNT][L1_HEIGHT][L1_WIDTH][DEMO_BUFFER_BYTE_PER_PIXEL], FRAME_BUFFER_ALIGN);
-AT_NONCACHEABLE_SECTION_ALIGN( static uint8_t s_frameBuffer2[APP_BUFFER_COUNT][L2_HEIGHT][L2_WIDTH][DEMO_BUFFER_BYTE_PER_PIXEL], FRAME_BUFFER_ALIGN);
-AT_NONCACHEABLE_SECTION_ALIGN( static uint8_t s_frameBuffer3[APP_BUFFER_COUNT][L3_HEIGHT][L3_WIDTH][DEMO_BUFFER_BYTE_PER_PIXEL], FRAME_BUFFER_ALIGN);
-AT_NONCACHEABLE_SECTION_ALIGN( static uint8_t s_frameBuffer4[APP_BUFFER_COUNT][L4_HEIGHT][L4_WIDTH][DEMO_BUFFER_BYTE_PER_PIXEL], FRAME_BUFFER_ALIGN);
-AT_NONCACHEABLE_SECTION_ALIGN( static uint8_t s_frameBuffer5[APP_BUFFER_COUNT][L5_HEIGHT][L5_WIDTH][DEMO_BUFFER_BYTE_PER_PIXEL], FRAME_BUFFER_ALIGN);
-AT_NONCACHEABLE_SECTION_ALIGN( static uint8_t s_frameBuffer6[APP_BUFFER_COUNT][L6_HEIGHT][L6_WIDTH][DEMO_BUFFER_BYTE_PER_PIXEL], FRAME_BUFFER_ALIGN);
-AT_NONCACHEABLE_SECTION_ALIGN( static uint8_t s_frameBuffer7[APP_BUFFER_COUNT][L7_HEIGHT][L7_WIDTH][DEMO_BUFFER_BYTE_PER_PIXEL], FRAME_BUFFER_ALIGN);
+AT_NONCACHEABLE_SECTION_ALIGN( static uint8_t s_frameBufferMemory[APP_FB_SIZE], FRAME_BUFFER_ALIGN);
+uint8_t* s_fbPtr = s_frameBufferMemory;
 
-uint8_t* s_frameBuffer[APP_HW_LAYERS_COUNT][APP_BUFFER_COUNT] = {
-    {&s_frameBuffer1[0][0][0][0], &s_frameBuffer1[1][0][0][0]},
-    {&s_frameBuffer2[0][0][0][0], &s_frameBuffer2[1][0][0][0]},
-    {&s_frameBuffer3[0][0][0][0], &s_frameBuffer3[1][0][0][0]},
-    {&s_frameBuffer4[0][0][0][0], &s_frameBuffer4[1][0][0][0]},
-    {&s_frameBuffer5[0][0][0][0], &s_frameBuffer5[1][0][0][0]},
-    {&s_frameBuffer6[0][0][0][0], &s_frameBuffer6[1][0][0][0]},
-    {&s_frameBuffer7[0][0][0][0], &s_frameBuffer7[1][0][0][0]}
- };
+void* fb_allocate(uint32_t size)
+{
+    if (s_fbPtr + size > s_frameBufferMemory + APP_FB_SIZE)
+        while (1)
+            ; // out of memory
+    void* retval = s_fbPtr;
+    size = ((size + FRAME_BUFFER_ALIGN - 1) & (~(FRAME_BUFFER_ALIGN-1)));
+    s_fbPtr += size;
+    return retval;
+}
 
 vg_lite_display_t g_display[8];
 vg_lite_window_t g_window[8];
@@ -121,13 +109,13 @@ vg_lite_window_t* VGLITE_CreateWindow(uint32_t displayId, vg_lite_rectangle_t* d
     g_fbInfo->bufInfo.startY      = dimensions->y;
     g_fbInfo->bufInfo.width       = window->width;
     g_fbInfo->bufInfo.height      = window->height;
-    g_fbInfo->bufInfo.strideBytes = get_stride_bytes(s_layerWidth[displayId], g_fbInfo->bufInfo.pixelFormat);
+    g_fbInfo->bufInfo.strideBytes = get_stride_bytes(window->width, g_fbInfo->bufInfo.pixelFormat);
 
     g_fbInfo->bufferCount = window->bufferCount;
     for (uint8_t i = 0; i < window->bufferCount; i++)
     {
         vg_buffer            = &(window->buffers[i]);
-        g_fbInfo->buffers[i] = (void *)s_frameBuffer[displayId][i];
+        g_fbInfo->buffers[i] = fb_allocate(g_fbInfo->bufInfo.height * g_fbInfo->bufInfo.strideBytes);
         vg_buffer->memory    = g_fbInfo->buffers[i];
         vg_buffer->address   = (uint32_t)g_fbInfo->buffers[i];
         vg_buffer->width     = g_fbInfo->bufInfo.width;
