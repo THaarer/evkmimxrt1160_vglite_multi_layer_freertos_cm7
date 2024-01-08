@@ -33,8 +33,7 @@ static void vglite_task(void *pvParameters);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-static vg_lite_display_t display;
-static vg_lite_window_t window;
+static vg_lite_window_t* window = NULL;
 
 /*
             *-----*
@@ -121,23 +120,16 @@ static void cleanup(void)
 
 static vg_lite_error_t init_vg_lite(void)
 {
-    vg_lite_error_t error = VG_LITE_SUCCESS;
-
-    error = VGLITE_CreateDisplay(&display);
-    if (error)
-    {
-        PRINTF("VGLITE_CreateDisplay failed: VGLITE_CreateDisplay() returned error %d\n", error);
-        return error;
-    }
     // Initialize the window.
-    error = VGLITE_CreateWindow(&display, &window);
-    if (error)
+    vg_lite_rectangle_t area0 = {0, 0, 720, 1280 };
+    window = VGLITE_CreateWindow(0, &area0, VG_LITE_BGRX8888);
+    if (window == NULL)
     {
-        PRINTF("VGLITE_CreateWindow failed: VGLITE_CreateWindow() returned error %d\n", error);
-        return error;
+        PRINTF("VGLITE_CreateWindow failed: VGLITE_CreateWindow() returned nullptr\n");
+        return VG_LITE_NOT_SUPPORT;
     }
     // Initialize the draw.
-    error = vg_lite_init(DEFAULT_VG_LITE_TW_WIDTH, DEFAULT_VG_LITE_TW_HEIGHT);
+    vg_lite_error_t error = vg_lite_init(DEFAULT_VG_LITE_TW_WIDTH, DEFAULT_VG_LITE_TW_HEIGHT);
     if (error)
     {
         PRINTF("vg_lite engine init failed: vg_lite_init() returned error %d\n", error);
@@ -160,7 +152,7 @@ static void redraw()
 {
     vg_lite_error_t error = VG_LITE_SUCCESS;
 
-    vg_lite_buffer_t *rt = VGLITE_GetRenderTarget(&window);
+    vg_lite_buffer_t *rt = VGLITE_GetRenderTarget(window);
     if (rt == NULL)
     {
         PRINTF("vg_lite_get_renderTarget error\r\n");
@@ -168,7 +160,7 @@ static void redraw()
             ;
     }
     vg_lite_identity(&matrix);
-    vg_lite_translate(window.width / 2.0f, window.height / 2.0f, &matrix);
+    vg_lite_translate(window->width / 2.0f, window->height / 2.0f, &matrix);
     vg_lite_scale(10, 10, &matrix);
 
     vg_lite_clear(rt, NULL, 0xFFFF0000);
@@ -179,7 +171,7 @@ static void redraw()
         cleanup();
         return;
     }
-    VGLITE_SwapBuffers(&window);
+    VGLITE_SwapBuffers(window);
 
     return;
 }

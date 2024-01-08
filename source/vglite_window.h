@@ -43,13 +43,9 @@ typedef struct vg_lite_window
 extern "C" {
 #endif /* __cplusplus */
 
-vg_lite_error_t VGLITE_CreateDisplay(vg_lite_display_t *display);
+vg_lite_window_t* VGLITE_CreateWindow(uint32_t displayId, vg_lite_rectangle_t* dimensions, vg_lite_buffer_format_t format);
 
-vg_lite_error_t VGLITE_CreateWindow(vg_lite_display_t *display, vg_lite_window_t *window);
-
-vg_lite_error_t VGLITE_DestoryWindow(void);
-
-vg_lite_error_t VGLITE_DestroyDisplay(void);
+void VGLITE_DestroyWindow(vg_lite_window_t*);
 
 vg_lite_buffer_t *VGLITE_GetRenderTarget(vg_lite_window_t *window);
 

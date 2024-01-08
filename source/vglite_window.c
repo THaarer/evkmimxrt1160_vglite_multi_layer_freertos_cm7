@@ -47,6 +47,8 @@ static const uint32_t s_frameBufferAddress[APP_BUFFER_COUNT] = {DEMO_BUFFER0_ADD
 /*******************************************************************************
  * Variables
  ******************************************************************************/
+vg_lite_display_t g_display[8];
+vg_lite_window_t g_window[8];
 
 /*******************************************************************************
  * Code
@@ -76,20 +78,14 @@ static vg_lite_buffer_format_t video_format_to_vglite(video_pixel_format_t forma
     return fmt;
 }
 
-vg_lite_error_t VGLITE_CreateDisplay(vg_lite_display_t *display)
+vg_lite_window_t* VGLITE_CreateWindow(uint32_t displayId, vg_lite_rectangle_t* dimensions, vg_lite_buffer_format_t format)
 {
-    if (!display)
-        return VG_LITE_INVALID_ARGUMENT;
+	BOARD_PrepareDisplayController();
 
-    BOARD_PrepareDisplayController();
-    FBDEV_Open(&display->g_fbdev, &g_dc, 0);
+	vg_lite_display_t* display = &g_display[displayId];
+	vg_lite_window_t* window = &g_window[displayId];
 
-    return VG_LITE_SUCCESS;
-}
-
-vg_lite_error_t VGLITE_CreateWindow(vg_lite_display_t *display, vg_lite_window_t *window)
-{
-    vg_lite_error_t ret = VG_LITE_SUCCESS;
+	FBDEV_Open(&display->g_fbdev, &g_dc, displayId);
     status_t status;
     void *buffer;
     vg_lite_buffer_t *vg_buffer;
@@ -140,17 +136,11 @@ vg_lite_error_t VGLITE_CreateWindow(vg_lite_display_t *display, vg_lite_window_t
 
     FBDEV_Enable(g_fbdev);
 
-    return ret;
+    return window;
 }
 
-vg_lite_error_t VGLITE_DestoryWindow(void)
+void VGLITE_DestroyWindow(vg_lite_window_t* window)
 {
-    return VG_LITE_SUCCESS;
-}
-
-vg_lite_error_t VGLITE_DestroyDisplay(void)
-{
-    return VG_LITE_SUCCESS;
 }
 
 vg_lite_buffer_t *VGLITE_GetRenderTarget(vg_lite_window_t *window)
