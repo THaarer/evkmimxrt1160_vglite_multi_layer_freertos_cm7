@@ -177,13 +177,28 @@ static void vglite_task(void *pvParameters)
 {
     status_t status;
     vg_lite_error_t error;
-    int numWindows = 4;
+    int numWindows = 7;
     vg_lite_window_t* windows[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     vg_lite_rectangle_t area[] = {
             {0, 0, 720, 1280},
             {0, 0, 80, 1280},
             {177, 69, 265, 492 },
             {326, 72, 227, 471 },
+            {449, 498, 80, 336 },
+            {0, 0, 600, 872 },
+            {88, 872, 552, 408 },
+    };
+
+    // BOARD_InitLcdifClock may need changes if the buffer data gets too large
+    vg_lite_format_t bufferFormat[] = {
+        VG_LITE_BGR565,
+        VG_LITE_BGRA4444,
+        VG_LITE_BGRA4444,
+        VG_LITE_BGRA4444,
+        VG_LITE_BGRA4444,
+        VG_LITE_BGRA4444,
+        VG_LITE_BGRA4444,
+        VG_LITE_BGRA4444,
     };
 
     status = BOARD_PrepareVGLiteController();
@@ -212,7 +227,7 @@ static void vglite_task(void *pvParameters)
     // initialize the windows
     for (int i = 0; i < numWindows; ++i)
     {
-        windows[i] = VGLITE_CreateWindow(i, &area[i], i == 0 ? VG_LITE_BGRX8888 : VG_LITE_BGRA8888);
+        windows[i] = VGLITE_CreateWindow(i, &area[i], bufferFormat[i]);
         if (windows[i] == NULL)
         {
             PRINTF("VGLITE_CreateWindow failed: VGLITE_CreateWindow() returned nullptr\n");
@@ -226,13 +241,19 @@ static void vglite_task(void *pvParameters)
 
     while (1)
     {
-        redraw(windows[0], 0xFFFF0000, 0xFF0000FF, 45);
+        redraw(windows[0], 0xFFFF0000, 0xFF0000FF, 45 + n);
         if(windows[1])
-            redraw(windows[1], 0x40000000, 0xFF00FF00, 0);
+            redraw(windows[1], 0x40000000, 0xFF00FF00, n);
         if(windows[2])
             redraw(windows[2], 0x80000000, 0xFF00FFFF, n);
         if(windows[3])
             redraw(windows[3], 0x40000000, 0xFFFF00FF, 90-n);
+        if(windows[4])
+            redraw(windows[4], 0x10000000, 0xFFFFFF00, 80-n);
+        if(windows[5])
+            redraw(windows[5], 0x10000000, 0xFF0080FF, 100+n);
+        if(windows[6])
+            redraw(windows[6], 0x10000000, 0xFFFFFFFF, 90-n);
 
         if (n++ >= 59)
         {

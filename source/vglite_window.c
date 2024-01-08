@@ -60,6 +60,10 @@ static video_pixel_format_t vglite_to_video_format(vg_lite_buffer_format_t forma
     case VG_LITE_RGBX8888:
     case VG_LITE_RGBA8888:
         return kVIDEO_PixelFormatXBGR8888;
+    case VG_LITE_BGRA4444:
+        return kVIDEO_PixelFormatXRGB4444;
+    case VG_LITE_RGBA4444:
+        return kVIDEO_PixelFormatXBGR4444;
     default:
         break;
     }
