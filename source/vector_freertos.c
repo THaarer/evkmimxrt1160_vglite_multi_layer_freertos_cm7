@@ -177,6 +177,8 @@ static void vglite_task(void *pvParameters)
 {
     status_t status;
     vg_lite_error_t error;
+    int numWindows = 3;
+    vg_lite_window_t* windows[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
     status = BOARD_PrepareVGLiteController();
     if (status != kStatus_Success)
@@ -203,30 +205,49 @@ static void vglite_task(void *pvParameters)
 
     // Initialize the window.
     vg_lite_rectangle_t area0 = {0, 0, 720, 1280 };
-    vg_lite_window_t* window0 = VGLITE_CreateWindow(0, &area0, VG_LITE_BGRX8888);
-    if (window0 == NULL)
+    windows[0] = VGLITE_CreateWindow(0, &area0, VG_LITE_BGRX8888);
+    if (windows[0] == NULL)
     {
         PRINTF("VGLITE_CreateWindow failed: VGLITE_CreateWindow() returned nullptr\n");
         while (1)
             ;
     }
 
-    vg_lite_rectangle_t area1 = {0, 0, 80, 1280 };
-        vg_lite_window_t* window1 = VGLITE_CreateWindow(1, &area1, VG_LITE_BGRA8888);
-        if (window1 == NULL)
+    if (numWindows >= 2)
+    {
+        vg_lite_rectangle_t area1 = {0, 0, 80, 1280 };
+        windows[1] = VGLITE_CreateWindow(1, &area1, VG_LITE_BGRA8888);
+        if (windows[1] == NULL)
         {
             PRINTF("VGLITE_CreateWindow failed: VGLITE_CreateWindow() returned nullptr\n");
             while (1)
                 ;
         }
+    }
+
+    if (numWindows >= 3)
+    {
+        vg_lite_rectangle_t area2 = {177, 69, 265, 492 };
+        windows[2] = VGLITE_CreateWindow(2, &area2, VG_LITE_BGRA8888);
+        if (windows[2] == NULL)
+        {
+            PRINTF("VGLITE_CreateWindow failed: VGLITE_CreateWindow() returned nullptr\n");
+            while (1)
+                ;
+        }
+    }
 
     uint32_t startTime, time, n = 0;
     startTime = getTime();
 
     while (1)
     {
-        redraw(window0, 0xFFFF0000, 0xFF0000FF, 45);
-        redraw(window1, 0x00000000, 0xFF00FF00, 0);
+        redraw(windows[0], 0xFFFF0000, 0xFF0000FF, 45);
+        if(windows[1])
+            redraw(windows[1], 0x40000000, 0xFF00FF00, 0);
+        if(windows[2])
+            redraw(windows[2], 0x80000000, 0xFF00FFFF, n);
+
         if (n++ >= 59)
         {
             time = getTime() - startTime;
