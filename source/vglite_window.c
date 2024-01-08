@@ -58,29 +58,43 @@ vg_lite_window_t g_window[8];
 /*******************************************************************************
  * Code
  ******************************************************************************/
-static vg_lite_buffer_format_t video_format_to_vglite(video_pixel_format_t format)
+static video_pixel_format_t vglite_to_video_format(vg_lite_buffer_format_t format)
 {
-    vg_lite_buffer_format_t fmt;
     switch (format)
     {
-        case kVIDEO_PixelFormatRGB565:
-            fmt = VG_LITE_BGR565;
-            break;
-
-        case kVIDEO_PixelFormatBGR565:
-            fmt = VG_LITE_RGB565;
-            break;
-
-        case kVIDEO_PixelFormatXRGB8888:
-            fmt = VG_LITE_BGRX8888;
-            break;
-
-        default:
-            fmt = VG_LITE_RGB565;
-            break;
+    case VG_LITE_BGR565:
+        return kVIDEO_PixelFormatRGB565;
+    case VG_LITE_RGB565 :
+        return kVIDEO_PixelFormatBGR565;
+    case VG_LITE_BGRX8888:
+    case VG_LITE_BGRA8888:
+        return kVIDEO_PixelFormatXRGB8888;
+    case VG_LITE_RGBX8888:
+    case VG_LITE_RGBA8888:
+        return kVIDEO_PixelFormatXBGR8888;
+    default:
+        break;
     }
 
-    return fmt;
+    return kVIDEO_PixelFormatRGB565;
+}
+
+static uint16_t get_stride_bytes(uint16_t width, video_pixel_format_t format)
+{
+    switch(format)
+    {
+    case kVIDEO_PixelFormatXRGB8888:
+    case kVIDEO_PixelFormatXBGR8888:
+    case kVIDEO_PixelFormatRGBX8888:
+    case kVIDEO_PixelFormatBGRX8888:
+        return width * 4;
+    case kVIDEO_PixelFormatRGB888:
+    case kVIDEO_PixelFormatBGR888:
+        return width * 3;
+    case kVIDEO_PixelFormatLUT8:
+        return width;
+    }
+    return width * 2;
 }
 
 vg_lite_window_t* VGLITE_CreateWindow(uint32_t displayId, vg_lite_rectangle_t* dimensions, vg_lite_buffer_format_t format)
@@ -102,12 +116,12 @@ vg_lite_window_t* VGLITE_CreateWindow(uint32_t displayId, vg_lite_rectangle_t* d
     window->current     = -1;
     FBDEV_GetFrameBufferInfo(g_fbdev, g_fbInfo);
 
-    g_fbInfo->bufInfo.pixelFormat = DEMO_BUFFER_PIXEL_FORMAT;
+    g_fbInfo->bufInfo.pixelFormat = vglite_to_video_format(format);
     g_fbInfo->bufInfo.startX      = dimensions->x;
     g_fbInfo->bufInfo.startY      = dimensions->y;
     g_fbInfo->bufInfo.width       = window->width;
     g_fbInfo->bufInfo.height      = window->height;
-    g_fbInfo->bufInfo.strideBytes = s_layerWidth[displayId] * DEMO_BUFFER_BYTE_PER_PIXEL;
+    g_fbInfo->bufInfo.strideBytes = get_stride_bytes(s_layerWidth[displayId], g_fbInfo->bufInfo.pixelFormat);
 
     g_fbInfo->bufferCount = window->bufferCount;
     for (uint8_t i = 0; i < window->bufferCount; i++)
