@@ -64,6 +64,10 @@ static video_pixel_format_t vglite_to_video_format(vg_lite_buffer_format_t forma
         return kVIDEO_PixelFormatXRGB4444;
     case VG_LITE_RGBA4444:
         return kVIDEO_PixelFormatXBGR4444;
+    case VG_LITE_BGRA5551:
+        return kVIDEO_PixelFormatXRGB1555;
+    case VG_LITE_RGBA5551:
+        return kVIDEO_PixelFormatXBGR1555;
     default:
         break;
     }
@@ -146,7 +150,7 @@ vg_lite_window_t* VGLITE_CreateWindow(uint32_t displayId, vg_lite_rectangle_t* d
     // LCDIFV2_SetLayerBlendConfig writes to shadow register (i.e. it has no immediate effect)
     // FBDEV_Enable() will flush the blend config to the hardware
     dc_fb_lcdifv2_handle_t *dcHandle = g_dc.prvData;
-    lcdifv2_blend_config_t blendConfig = { .alphaMode = kLCDIFV2_AlphaEmbedded };
+    lcdifv2_blend_config_t blendConfig = { .globalAlpha = 255, .alphaMode = kLCDIFV2_AlphaEmbedded };
     LCDIFV2_SetLayerBlendConfig(dcHandle->lcdifv2, displayId, &blendConfig);     // TODO: feels wrong to call it directly - should be probably part of FBDEV
 
     FBDEV_Enable(g_fbdev);

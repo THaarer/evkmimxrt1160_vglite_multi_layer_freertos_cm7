@@ -192,7 +192,7 @@ static void vglite_task(void *pvParameters)
     // BOARD_InitLcdifClock may need changes if the buffer data gets too large
     vg_lite_format_t bufferFormat[] = {
         VG_LITE_BGR565,
-        VG_LITE_BGRA4444,
+        VG_LITE_BGRA5551,
         VG_LITE_BGRA4444,
         VG_LITE_BGRA4444,
         VG_LITE_BGRA4444,
@@ -243,7 +243,7 @@ static void vglite_task(void *pvParameters)
     {
         redraw(windows[0], 0xFFFF0000, 0xFF0000FF, 45 + n);
         if(windows[1])
-            redraw(windows[1], 0x40000000, 0xFF00FF00, n);
+            redraw(windows[1], 0xFF000000, 0xFF00FF00, n);
         if(windows[2])
             redraw(windows[2], 0x80000000, 0xFF00FFFF, n);
         if(windows[3])
