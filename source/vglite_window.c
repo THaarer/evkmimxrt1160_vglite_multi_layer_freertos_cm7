@@ -118,7 +118,7 @@ vg_lite_window_t* VGLITE_CreateWindow(uint32_t displayId, vg_lite_rectangle_t* d
         vg_buffer->width     = g_fbInfo->bufInfo.width;
         vg_buffer->height    = g_fbInfo->bufInfo.height;
         vg_buffer->stride    = g_fbInfo->bufInfo.strideBytes;
-        vg_buffer->format    = video_format_to_vglite(DEMO_BUFFER_PIXEL_FORMAT);
+        vg_buffer->format    = format;
     }
 
     status = FBDEV_SetFrameBufferInfo(g_fbdev, g_fbInfo);

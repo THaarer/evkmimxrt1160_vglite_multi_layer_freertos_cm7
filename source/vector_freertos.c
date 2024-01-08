@@ -139,7 +139,7 @@ static vg_lite_error_t init_vg_lite(void)
     return error;
 }
 
-static void redraw(vg_lite_window_t* window)
+static void redraw(vg_lite_window_t* window, vg_lite_color_t bg, vg_lite_color_t fg, float angle)
 {
     vg_lite_error_t error = VG_LITE_SUCCESS;
 
@@ -152,10 +152,11 @@ static void redraw(vg_lite_window_t* window)
     }
     vg_lite_identity(&matrix);
     vg_lite_translate(window->width / 2.0f, window->height / 2.0f, &matrix);
+    vg_lite_rotate(angle, &matrix);
     vg_lite_scale(10, 10, &matrix);
 
-    vg_lite_clear(rt, NULL, 0xFFFF0000);
-    error = vg_lite_draw(rt, &path, VG_LITE_FILL_EVEN_ODD, &matrix, VG_LITE_BLEND_NONE, 0xFF0000FF);
+    vg_lite_clear(rt, NULL, bg);
+    error = vg_lite_draw(rt, &path, VG_LITE_FILL_EVEN_ODD, &matrix, VG_LITE_BLEND_NONE, fg);
     if (error)
     {
         PRINTF("vg_lite_draw() returned error %d\n", error);
@@ -202,20 +203,30 @@ static void vglite_task(void *pvParameters)
 
     // Initialize the window.
     vg_lite_rectangle_t area0 = {0, 0, 720, 1280 };
-    vg_lite_window_t* window = VGLITE_CreateWindow(0, &area0, VG_LITE_BGRX8888);
-    if (window == NULL)
+    vg_lite_window_t* window0 = VGLITE_CreateWindow(0, &area0, VG_LITE_BGRX8888);
+    if (window0 == NULL)
     {
         PRINTF("VGLITE_CreateWindow failed: VGLITE_CreateWindow() returned nullptr\n");
         while (1)
             ;
     }
 
+    vg_lite_rectangle_t area1 = {0, 0, 80, 1280 };
+        vg_lite_window_t* window1 = VGLITE_CreateWindow(1, &area1, VG_LITE_BGRA8888);
+        if (window1 == NULL)
+        {
+            PRINTF("VGLITE_CreateWindow failed: VGLITE_CreateWindow() returned nullptr\n");
+            while (1)
+                ;
+        }
+
     uint32_t startTime, time, n = 0;
     startTime = getTime();
 
     while (1)
     {
-        redraw(window);
+        redraw(window0, 0xFFFF0000, 0xFF0000FF, 45);
+        redraw(window1, 0x00000000, 0xFF00FF00, 0);
         if (n++ >= 59)
         {
             time = getTime() - startTime;
