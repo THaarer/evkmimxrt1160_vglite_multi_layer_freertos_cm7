@@ -10,6 +10,7 @@
 #include "task.h"
 #include "vg_lite_platform.h"
 #include "vglite_window.h"
+#include "fsl_dc_fb_lcdifv2.h"
 
 /*******************************************************************************
  * Definitions
@@ -135,6 +136,12 @@ vg_lite_window_t* VGLITE_CreateWindow(uint32_t displayId, vg_lite_rectangle_t* d
     memset(buffer, 0, g_fbInfo->bufInfo.height * g_fbInfo->bufInfo.strideBytes);
 
     FBDEV_SetFrameBuffer(g_fbdev, buffer, 0);
+
+    // LCDIFV2_SetLayerBlendConfig writes to shadow register (i.e. it has no immediate effect)
+    // FBDEV_Enable() will flush the blend config to the hardware
+    dc_fb_lcdifv2_handle_t *dcHandle = g_dc.prvData;
+    lcdifv2_blend_config_t blendConfig = { .alphaMode = kLCDIFV2_AlphaEmbedded };
+    LCDIFV2_SetLayerBlendConfig(dcHandle->lcdifv2, displayId, &blendConfig);     // TODO: feels wrong to call it directly - should be probably part of FBDEV
 
     FBDEV_Enable(g_fbdev);
 
