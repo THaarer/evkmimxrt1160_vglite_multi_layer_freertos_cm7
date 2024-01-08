@@ -177,8 +177,14 @@ static void vglite_task(void *pvParameters)
 {
     status_t status;
     vg_lite_error_t error;
-    int numWindows = 3;
+    int numWindows = 4;
     vg_lite_window_t* windows[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    vg_lite_rectangle_t area[] = {
+            {0, 0, 720, 1280},
+            {0, 0, 80, 1280},
+            {177, 69, 265, 492 },
+            {326, 72, 227, 471 },
+    };
 
     status = BOARD_PrepareVGLiteController();
     if (status != kStatus_Success)
@@ -203,33 +209,11 @@ static void vglite_task(void *pvParameters)
             ;
     }
 
-    // Initialize the window.
-    vg_lite_rectangle_t area0 = {0, 0, 720, 1280 };
-    windows[0] = VGLITE_CreateWindow(0, &area0, VG_LITE_BGRX8888);
-    if (windows[0] == NULL)
+    // initialize the windows
+    for (int i = 0; i < numWindows; ++i)
     {
-        PRINTF("VGLITE_CreateWindow failed: VGLITE_CreateWindow() returned nullptr\n");
-        while (1)
-            ;
-    }
-
-    if (numWindows >= 2)
-    {
-        vg_lite_rectangle_t area1 = {0, 0, 80, 1280 };
-        windows[1] = VGLITE_CreateWindow(1, &area1, VG_LITE_BGRA8888);
-        if (windows[1] == NULL)
-        {
-            PRINTF("VGLITE_CreateWindow failed: VGLITE_CreateWindow() returned nullptr\n");
-            while (1)
-                ;
-        }
-    }
-
-    if (numWindows >= 3)
-    {
-        vg_lite_rectangle_t area2 = {177, 69, 265, 492 };
-        windows[2] = VGLITE_CreateWindow(2, &area2, VG_LITE_BGRA8888);
-        if (windows[2] == NULL)
+        windows[i] = VGLITE_CreateWindow(i, &area[i], i == 0 ? VG_LITE_BGRX8888 : VG_LITE_BGRA8888);
+        if (windows[i] == NULL)
         {
             PRINTF("VGLITE_CreateWindow failed: VGLITE_CreateWindow() returned nullptr\n");
             while (1)
@@ -247,6 +231,8 @@ static void vglite_task(void *pvParameters)
             redraw(windows[1], 0x40000000, 0xFF00FF00, 0);
         if(windows[2])
             redraw(windows[2], 0x80000000, 0xFF00FFFF, n);
+        if(windows[3])
+            redraw(windows[3], 0x40000000, 0xFFFF00FF, 90-n);
 
         if (n++ >= 59)
         {
