@@ -47,7 +47,7 @@
 #define DEMO_BUFFER_COUNT 2 /* 2 is enough for DPI interface display. */
 
 #ifndef DEMO_USE_XRGB8888
-#define DEMO_USE_XRGB8888 0
+#define DEMO_USE_XRGB8888 1
 #endif
 
 /* Use LCDIF LUT (or named color palette) which is 8-bit per-pixel */
