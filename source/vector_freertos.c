@@ -193,9 +193,9 @@ static void vglite_task(void *pvParameters)
     vg_lite_format_t bufferFormat[] = {
         VG_LITE_BGR565,
         VG_LITE_BGRA5551,
-        VG_LITE_BGRA4444,
-        VG_LITE_BGRA4444,
-        VG_LITE_BGRA4444,
+        VG_LITE_BGRA8888,
+        VG_LITE_BGRA8888,
+        VG_LITE_BGRA8888,
         VG_LITE_BGRA4444,
         VG_LITE_BGRA4444,
         VG_LITE_BGRA4444,
@@ -253,7 +253,7 @@ static void vglite_task(void *pvParameters)
         if(windows[5])
             redraw(windows[5], 0x10000000, 0xFF0080FF, 100+n);
         if(windows[6])
-            redraw(windows[6], 0x10000000, 0xFFFFFFFF, 90-n);
+            redraw(windows[6], 0x10000000, 0x80FFFFFF, 90-n);
 
         if (n++ >= 59)
         {
