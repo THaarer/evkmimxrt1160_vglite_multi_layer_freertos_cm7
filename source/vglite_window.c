@@ -139,21 +139,7 @@ vg_lite_window_t* VGLITE_CreateWindow(uint32_t displayId, vg_lite_rectangle_t* d
             ;
     }
 
-    buffer = FBDEV_GetFrameBuffer(g_fbdev, 0);
-
-    assert(buffer != NULL);
-
-    memset(buffer, 0, g_fbInfo->bufInfo.height * g_fbInfo->bufInfo.strideBytes);
-
-    FBDEV_SetFrameBuffer(g_fbdev, buffer, 0);
-
-    // LCDIFV2_SetLayerBlendConfig writes to shadow register (i.e. it has no immediate effect)
-    // FBDEV_Enable() will flush the blend config to the hardware
-    dc_fb_lcdifv2_handle_t *dcHandle = g_dc.prvData;
-    lcdifv2_blend_config_t blendConfig = { .globalAlpha = 255, .alphaMode = kLCDIFV2_AlphaEmbedded };
-    LCDIFV2_SetLayerBlendConfig(dcHandle->lcdifv2, displayId, &blendConfig);     // TODO: feels wrong to call it directly - should be probably part of FBDEV
-
-    FBDEV_Enable(g_fbdev);
+    // window is enabled after first swapBuffers()
 
     return window;
 }
@@ -188,5 +174,19 @@ void VGLITE_SwapBuffers(vg_lite_window_t *window)
 
     vg_lite_finish();
 
-    FBDEV_SetFrameBuffer(&window->display->g_fbdev, rt->memory, 0);
+
+    fbdev_t *g_fbdev = &(window->display->g_fbdev);
+
+    FBDEV_SetFrameBuffer(g_fbdev, rt->memory, 0);
+    if (!g_fbdev->enabled)
+    {
+        // LCDIFV2_SetLayerBlendConfig writes to shadow register (i.e. it has no immediate effect)
+        // FBDEV_Enable() will flush the blend config to the hardware
+        dc_fb_lcdifv2_handle_t *dcHandle = g_dc.prvData;
+        lcdifv2_blend_config_t blendConfig = { .globalAlpha = 255, .alphaMode = kLCDIFV2_AlphaEmbedded };
+        uint32_t displayId = window->display - g_display;
+        LCDIFV2_SetLayerBlendConfig(dcHandle->lcdifv2, displayId, &blendConfig);     // TODO: feels wrong to call it directly - should be probably part of FBDEV
+
+        FBDEV_Enable(g_fbdev);
+    }
 }
